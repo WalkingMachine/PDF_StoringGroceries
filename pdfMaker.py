@@ -30,7 +30,8 @@ def fill_document(doc, try_number):
     """
 
     #cupboard_init_filename = os.path.join(os.path.dirname(__file__), 'objects/cupboard/cupboard_init.png')
-    folder_path = '/home/'+getpass.getuser()+'/roi_images_objects'
+    folder_path = '/home/'+getpass.getuser()
+
     cupboard_init_filename = folder_path + '/scene.png'
 
 
@@ -53,24 +54,24 @@ def fill_document(doc, try_number):
     doc.change_document_style("header")
 
     with doc.create(Figure(position='h!')) as cupboard_pic:
-        cupboard_pic.add_image(folder_path+'/scene.png', width='120px')
+        cupboard_pic.add_image(folder_path+'/detection_1/scene.png', width='120px')
         cupboard_pic.add_caption('Cupboard picture - initial state')
-        cupboard_pic.add_image(folder_path + '/scene2.png', width='120px')
+        cupboard_pic.add_image(folder_path + '/detection_3/scene.png', width='120px')
         cupboard_pic.add_caption('Cupboard picture - final state')
 
     # Number of objects
     #number_objects = len([name for name in os.listdir('objects') if os.path.isfile(os.getcwd()+"/objects/"+name)])
-    liste_fichiers = [name for name in os.listdir(folder_path) if os.path.isfile(folder_path+'/'+name) and name != 'scene.png' and name != 'scene2.png']
+    liste_fichiers = [name for name in os.listdir(folder_path+'/detection_2/') if os.path.isfile(folder_path+'/detection_2/'+name) and name != 'scene.png' and name != 'scene2.png']
     print liste_fichiers
     # Add cheque images
     with doc.create(LongTabu("X[c] X[c]")) as image_table:
         nb_row = int(numpy.ceil(len(liste_fichiers) / 2.0))
         for i in range(1, nb_row+1):
-            file1 = folder_path+'/'+liste_fichiers[i-1]
+            file1 = folder_path+'/'+'/detection_2/'+liste_fichiers[i-1]
             if i == nb_row and len(liste_fichiers) < 2*nb_row:
                 file2 = ''
             else:
-                file2 = folder_path+'/'+liste_fichiers[(i-1+nb_row)]
+                file2 = folder_path+'/detection_2/'+liste_fichiers[(i-1+nb_row)]
 
             image_table.add_row([StandAloneGraphic(file1, image_options="width=200px"),
                                   StandAloneGraphic(file2, image_options="width=200px")])
