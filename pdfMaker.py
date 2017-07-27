@@ -1,10 +1,20 @@
+# -*- coding: utf-8 -*- 
 #!/usr/bin/env python
 
 from pylatex import Figure, PageStyle, Head, LineBreak, simple_page_number
 from pylatex import Document, Section, Subsection, NoEscape, utils, LongTabu, StandAloneGraphic
 import os
 import datetime
+import numpy
+import getpass
+from shutil import copyfile
+
+
 import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
+
+
 
 
 def fill_document(doc, try_number):
@@ -14,7 +24,15 @@ def fill_document(doc, try_number):
     :param doc: the document
     :type doc: :class:`pylatex.document.Document` instance
     """
-    cupboard_init_filename = os.path.join(os.path.dirname(__file__), 'objects/cupboard_init.png')
+
+    """ ~/roi_images_objects 
+        scene.png
+    """
+
+    #cupboard_init_filename = os.path.join(os.path.dirname(__file__), 'objects/cupboard/cupboard_init.png')
+    folder_path = '/home/'+getpass.getuser()+'/roi_images_objects'
+    cupboard_init_filename = folder_path + '/scene.png'
+
 
     header = PageStyle("header")
 
@@ -35,21 +53,27 @@ def fill_document(doc, try_number):
     doc.change_document_style("header")
 
     with doc.create(Figure(position='h!')) as cupboard_pic:
-        cupboard_pic.add_image(cupboard_init_filename, width='120px')
+        cupboard_pic.add_image(folder_path+'/scene.png', width='120px')
         cupboard_pic.add_caption('Cupboard picture - initial state')
-        cupboard_pic.add_image(cupboard_init_filename, width='120px')
+        cupboard_pic.add_image(folder_path + '/scene2.png', width='120px')
         cupboard_pic.add_caption('Cupboard picture - final state')
 
     # Number of objects
-    number_objects = len([name for name in os.listdir('objects') if os.path.isfile(os.getcwd()+"/objects/"+name)])
-
+    #number_objects = len([name for name in os.listdir('objects') if os.path.isfile(os.getcwd()+"/objects/"+name)])
+    liste_fichiers = [name for name in os.listdir(folder_path) if os.path.isfile(folder_path+'/'+name) and name != 'scene.png' and name != 'scene2.png']
+    print liste_fichiers
     # Add cheque images
-    with doc.create(LongTabu("X[c] X[c]")) as cheque_table:
-        for i in range(1, 4):
-            cheque_table.add_row([StandAloneGraphic(os.path.join(os.path.dirname(__file__),
-                                   'object'+str(i)+'.jpg'), image_options="width=200px"),
-                                  StandAloneGraphic(os.path.join(os.path.dirname(__file__),
-                                   'object'+str(8-i)+'.jpg'), image_options="width=200px")])
+    with doc.create(LongTabu("X[c] X[c]")) as image_table:
+        nb_row = int(numpy.ceil(len(liste_fichiers) / 2.0))
+        for i in range(1, nb_row+1):
+            file1 = folder_path+'/'+liste_fichiers[i-1]
+            if i == nb_row and len(liste_fichiers) < 2*nb_row:
+                file2 = ''
+            else:
+                file2 = folder_path+'/'+liste_fichiers[(i-1+nb_row)]
+
+            image_table.add_row([StandAloneGraphic(file1, image_options="width=200px"),
+                                  StandAloneGraphic(file2, image_options="width=200px")])
 
 if __name__ == '__main__':
     # Basic document
@@ -60,8 +84,10 @@ if __name__ == '__main__':
         try_number = 1
     doc = Document('WalkingMachine_'+str(try_number), geometry_options=geometry_options)
     fill_document(doc, try_number)
-    doc.generate_pdf(clean_tex=False)
-
-
-
-
+    try:
+        doc.generate_pdf(clean_tex=False)
+    except:
+        print "oups"
+    src_path = '/home/' + getpass.getuser() +'/PDF_StoringGroceries/'+ 'WalkingMachine_'+str(try_number)+'.pdf'
+    usb_path = '/media/'+getpass.getuser()+'/8919-DC72/WalkingMachine_'+str(try_number)+'.pdf'
+    copyfile(src_path, usb_path)
